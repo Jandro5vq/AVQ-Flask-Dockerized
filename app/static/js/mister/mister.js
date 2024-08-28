@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cuerpoTabla = document.getElementById('cuerpo-tabla');
 
     function cargarPuntuaciones(jornada) {
-        fetch(`/api/puntos?jornada=${jornada}`)
+        fetch(`/api/jornada?jornada=${jornada}`)
             .then(response => response.json())
             .then(puntuaciones => {
                 cuerpoTabla.innerHTML = '';

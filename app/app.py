@@ -15,12 +15,32 @@ jugadores = [
 # Portfolio
 @app.route('/')
 def portfolio():
-    return render_template('portfolio.html')
+    return render_template('portfolio/portfolio.html')
 
 # UC Mister
+MISTER_KEY = 'uc'
+
 @app.route('/mister')
 def mister():
-    return render_template('mister.html')
+    # Verifica si el usuario ya ha ingresado la contraseña
+    if 'authenticated' in request.cookies and request.cookies.get('authenticated') == 'true':
+        return render_template('mister/mister.html')
+    else:
+        # Redirige a la página de login si no está autenticado
+        return redirect(url_for('misterlogin'))
+
+
+@app.route('/misterlogin', methods=['GET', 'POST'])
+def misterlogin():
+    if request.method == 'POST':
+        if request.form['password'] == MISTER_KEY:
+            response = redirect(url_for('mister'))
+            response.set_cookie('authenticated', 'true')
+            return response
+        else:
+            return render_template('mister/misterlogin.html', error="Contraseña incorrecta. Inténtalo de nuevo.")
+
+    return render_template('mister/misterlogin.html')
 
 
 # ==== API ====
@@ -29,7 +49,7 @@ def mister():
 def misterupdate():
     return {"message": "Updated"}, 202
 
-@app.route('/api/puntos', methods=['GET'])
+@app.route('/api/jornada', methods=['GET'])
 def obtener_puntos():
     jornada = request.args.get('jornada')
     if jornada not in ['jornada1', 'jornada2', 'jornada3']:
