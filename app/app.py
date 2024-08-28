@@ -1,4 +1,5 @@
 from flask import *
+from misterscrapper import UpdateMisterData
 import pymysql
 
 app = Flask(__name__)
@@ -47,7 +48,11 @@ def misterlogin():
 # UC Mister
 @app.route('/api/misterupdate', methods=['POST'])
 def misterupdate():
-    return {"message": "Updated"}, 202
+    success = UpdateMisterData()
+    if success:
+        return {"message": "Updated"}, 200
+    else:
+        return {"message": "Error Updating"}, 400
 
 @app.route('/api/jornada', methods=['GET'])
 def obtener_puntos():

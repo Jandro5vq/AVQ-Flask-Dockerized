@@ -1,3 +1,4 @@
 Flask==3.0.3
 pymysql==1.1.1
-selenium==4.23.1
+selenium==4.23.
+python-dotenv==1.0.1
