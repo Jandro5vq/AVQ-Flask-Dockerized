@@ -48,9 +48,9 @@ def misterlogin():
 # UC Mister
 @app.route('/api/misterupdate', methods=['POST'])
 def misterupdate():
-    success = UpdateMisterData()
+    success, standings = UpdateMisterData()
     if success:
-        return {"message": "Updated"}, 200
+        return standings, 200
     else:
         return {"message": "Error Updating"}, 400
 
