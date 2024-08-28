@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla de Puntuaciones</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Selecciona una Jornada</h1>
+        <select id="selector-jornada">
+            <option value="jornada1">Jornada 1</option>
+            <option value="jornada2">Jornada 2</option>
+            <option value="jornada3">Jornada 3</option>
+        </select>
+        
+        <table id="tabla-puntuaciones">
+            <thead>
+                <tr>
+                    <th>Jugador</th>
+                    <th>Puntos</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpo-tabla">
+                <!-- Las filas se generarán dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
