@@ -15,14 +15,15 @@ log_folder = "logs"
 os.makedirs(log_folder, exist_ok=True)
 
 # Obtén la fecha actual para el nombre del archivo de log
-date_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+date_str = datetime.now().strftime("%d-%m-%Y")
 log_file = os.path.join(log_folder, f'app_{date_str}.log')
 
-# Configura el archivo de log
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[
-    logging.FileHandler(log_file),
-    logging.StreamHandler()
-])
+# Configura el archivo de log en modo append
+file_handler = logging.FileHandler(log_file, mode='a')
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+# Configura el logging con el manejador de archivos y el de consola
+logging.basicConfig(level=logging.INFO, handlers=[file_handler, logging.StreamHandler()])
 
 # Contador global para numerar las capturas de pantalla
 screenshot_counter = 1
@@ -168,7 +169,10 @@ def UpdateMisterData():
 
         logging.info("Datos obtenidos:")
         logging.info(json.dumps(all_standings, indent=4))
-        success = True
+        if (bool(all_standings)):
+            success = True
+        else:
+            success = False
 
     except Exception as e:
         capture_screenshot(driver, "update_error")
