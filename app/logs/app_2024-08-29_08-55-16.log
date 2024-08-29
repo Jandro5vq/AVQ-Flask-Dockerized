@@ -1,0 +1,36 @@
+2024-08-29 08:55:16,554 - INFO - ====== WebDriver manager ======
+2024-08-29 08:55:16,644 - INFO - Get LATEST chromedriver version for google-chrome
+2024-08-29 08:55:16,809 - INFO - Get LATEST chromedriver version for google-chrome
+2024-08-29 08:55:16,874 - INFO - Driver [/root/.wdm/drivers/chromedriver/linux64/128.0.6613.86/chromedriver-linux64/chromedriver] found in cache
+2024-08-29 08:55:20,538 - INFO - Captura de pantalla guardada como /screenshots/001_login_page_loaded.png
+2024-08-29 08:55:20,730 - INFO - Captura de pantalla guardada como /screenshots/002_password_field_filled.png
+2024-08-29 08:55:20,954 - INFO - Captura de pantalla guardada como /screenshots/003_login_button_clicked.png
+2024-08-29 08:55:21,016 - INFO - Captura de pantalla guardada como /screenshots/004_home_page_after_login.png
+2024-08-29 08:55:21,016 - INFO - Inicio de sesión exitoso.
+2024-08-29 08:55:22,199 - INFO - Captura de pantalla guardada como /screenshots/005_standings_page_loaded.png
+2024-08-29 08:55:42,708 - INFO - Captura de pantalla guardada como /screenshots/006_jornadas_error.png
+2024-08-29 08:55:42,709 - ERROR - Error al obtener las jornadas: Message: 
+Stacktrace:
+#0 0x55d0b89fd8da <unknown>
+#1 0x55d0b86cbe50 <unknown>
+#2 0x55d0b871b644 <unknown>
+#3 0x55d0b871b931 <unknown>
+#4 0x55d0b8761534 <unknown>
+#5 0x55d0b87404bd <unknown>
+#6 0x55d0b875e9c6 <unknown>
+#7 0x55d0b8740233 <unknown>
+#8 0x55d0b870e093 <unknown>
+#9 0x55d0b870f09e <unknown>
+#10 0x55d0b89c4b3b <unknown>
+#11 0x55d0b89c8af1 <unknown>
+#12 0x55d0b89b0705 <unknown>
+#13 0x55d0b89c9662 <unknown>
+#14 0x55d0b89958df <unknown>
+#15 0x55d0b89ec6d8 <unknown>
+#16 0x55d0b89ec8a2 <unknown>
+#17 0x55d0b89fc6cc <unknown>
+#18 0x7f8a2419e134 <unknown>
+
+2024-08-29 08:55:42,709 - INFO - Datos obtenidos:
+2024-08-29 08:55:42,709 - INFO - {}
+2024-08-29 08:55:42,869 - INFO - Actualización completada. Éxito: True

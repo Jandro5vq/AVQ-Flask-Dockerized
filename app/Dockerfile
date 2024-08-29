@@ -4,41 +4,37 @@ FROM debian:latest
 # Instalación de dependencias necesarias
 RUN apt-get update && \
     apt-get install -y \
-    neofetch \
-    nano \
     wget \
     unzip \
-    jq \
+    libnss3 \
+    libgbm-dev \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libxtst6 \
+    libxss1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libgtk-3-0 \
+    fonts-liberation \
+    libvulkan1 \
+    xdg-utils \
     python3 \
     python3-pip \
     python3.11-venv \
+    curl \
+    neofetch \
     && rm -rf /var/lib/apt/lists/*
 
-# Obtener y procesar el JSON para descargar Google Chrome y ChromeDriver
-RUN echo "Descargando JSON de versiones de Chrome..." && \
-    wget --show-progress -q https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json -O /tmp/chrome-versions.json && \
-    echo "JSON descargado, extrayendo URLs..." && \
-    CHROME_URL=$(jq -r '.channels.Stable.downloads.chrome[] | select(.platform=="linux64") | .url' /tmp/chrome-versions.json) && \
-    CHROMEDRIVER_URL=$(jq -r '.channels.Stable.downloads.chromedriver[] | select(.platform=="linux64") | .url' /tmp/chrome-versions.json) && \
-    echo "URL de Chrome: $CHROME_URL" && \
-    echo "URL de ChromeDriver: $CHROMEDRIVER_URL" && \
-    echo "Descargando Google Chrome..." && \
-    wget --show-progress -q $CHROME_URL -O /tmp/chrome-linux64.zip && \
-    echo "Descargando ChromeDriver..." && \
-    wget --show-progress -q $CHROMEDRIVER_URL -O /tmp/chromedriver-linux64.zip && \
-    echo "Creando directorio para Google Chrome..." && \
-    mkdir -p /opt/google/chrome && \
-    echo "Descomprimiendo Google Chrome..." && \
-    unzip /tmp/chrome-linux64.zip -d /opt/google/chrome && \
-    echo "Descomprimiendo ChromeDriver..." && \
-    unzip /tmp/chromedriver-linux64.zip -d /usr/local/bin/ && \
-    chmod +x /usr/local/bin/chromedriver && \
-    echo "Limpieza de archivos temporales..." && \
-    rm /tmp/chrome-linux64.zip /tmp/chromedriver-linux64.zip /tmp/chrome-versions.json
+# Instala Google Chrome
+RUN curl -sS https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /tmp/google-chrome.deb && \
+    apt-get install -y /tmp/google-chrome.deb && \
+    rm /tmp/google-chrome.deb
 
-# Personalizar bashrc para ejecutar comandos al iniciar la shell
-RUN echo 'clear' >> /root/.bashrc
-RUN echo 'neofetch' >> /root/.bashrc
+# Configura .bashrc para ejecutar clear y neofetch al iniciar bash
+RUN echo 'clear' >> /root/.bashrc && \
+    echo 'neofetch' >> /root/.bashrc
 
 # Establece el directorio de trabajo
 WORKDIR /app
@@ -57,5 +53,5 @@ RUN echo "Creando entorno virtual de Python..." && \
 # Configurar el contenedor para usar el entorno virtual
 ENV PATH="/venv/bin:$PATH"
 
-# Comando para ejecutar la aplicación
+# Comando por defecto para iniciar el contenedor
 CMD ["flask", "run", "--host=0.0.0.0"]
