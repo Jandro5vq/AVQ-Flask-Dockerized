@@ -10,22 +10,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 from dotenv import load_dotenv
 import json
 
-# Configuración de logging
 log_folder = "logs"
 os.makedirs(log_folder, exist_ok=True)
-
-# Obtén la fecha actual para el nombre del archivo de log
 date_str = datetime.now().strftime("%d-%m-%Y")
 log_file = os.path.join(log_folder, f'app_{date_str}.log')
-
-# Configura el archivo de log en modo append
 file_handler = logging.FileHandler(log_file, mode='a')
 file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-
-# Configura el logging con el manejador de archivos y el de consola
 logging.basicConfig(level=logging.INFO, handlers=[file_handler, logging.StreamHandler()])
 
-# Contador global para numerar las capturas de pantalla
 screenshot_counter = 1
 
 def capture_screenshot(driver, step_name):
@@ -175,13 +167,58 @@ def UpdateMisterData():
             success = False
 
     except Exception as e:
-        capture_screenshot(driver, "update_error")
-        logging.error(f"Error durante la actualización de datos: {e}")
+        capture_screenshot(driver, "point_list_error")
+        logging.error(f"Error durante la recoleccion de datos: {e}")
 
     finally:
         driver.quit()
 
     return success, all_standings
+
+def UpdatePlayerList():
+    success = False
+    load_dotenv()
+    email = os.getenv("MISTER_USERNAME")
+    password = os.getenv("MISTER_PASSWORD")
+
+    if not email or not password:
+        logging.error("Las variables de entorno USERNAME y/o PASSWORD no están definidas.")
+        return success, {}
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--headless')
+    
+    # Configura el servicio de ChromeDriver con webdriver-manager
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+
+    try:
+        MisterLogin(driver, email, password)
+        
+        driver.get("https://mister.mundodeportivo.com/standings")
+        capture_screenshot(driver, "standings_page_loaded")
+        
+        player_list = {}
+
+        
+
+        logging.info("Datos obtenidos:")
+        logging.info(json.dumps(player_list, indent=4))
+        if (bool(player_list)):
+            success = True
+        else:
+            success = False
+
+    except Exception as e:
+        capture_screenshot(driver, "player_list_error")
+        logging.error(f"Error durante la recoleccion de datos: {e}")
+
+    finally:
+        driver.quit()
+
+    return success, player_list
 
 if __name__ == "__main__":
     success, standings = UpdateMisterData()

@@ -1,8 +1,13 @@
 from flask import *
 from misterscrapper import UpdateMisterData
 import pymysql
+import os
+from dotenv import load_dotenv
+from db.mister.misterdb import *
 
 app = Flask(__name__)
+
+load_dotenv()
 
 # Datos de ejemplo
 jugadores = [
@@ -11,6 +16,17 @@ jugadores = [
     {'nombre': 'Jugador 3', 'puntos': {'jornada1': 7, 'jornada2': 14, 'jornada3': 12}},
     {'nombre': 'Jugador 4', 'puntos': {'jornada1': 9, 'jornada2': 10, 'jornada3': 11}},
 ]
+
+# ==== BASE DE DATOS ====
+def get_db_connection():
+    """Obtiene una conexión a la base de datos."""
+    return pymysql.connect(
+        host='localhost',
+        user=os.getenv('MYSQL_USER'),
+        password=os.getenv('MYSQL_PASSWORD'),
+        database=os.getenv('MYSQL_DATABASE'),
+        cursorclass=pymysql.cursors.DictCursor
+    )
 
 # ==== RUTAS ====
 # Portfolio
@@ -49,10 +65,10 @@ def misterlogin():
 @app.route('/api/misterupdate', methods=['POST'])
 def misterupdate():
     success, standings = UpdateMisterData()
-    if success:
-        return standings, 200
-    else:
+    if not success:
         return {"message": "Error Updating"}, 400
+    return jsonify(standings), 200
+
 
 @app.route('/api/jornada', methods=['GET'])
 def obtener_puntos():
