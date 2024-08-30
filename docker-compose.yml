@@ -8,7 +8,6 @@ services:
     environment:
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
-      - DATABASE_URI=${DATABASE_URI}
     volumes:
       - ./app:/app
       - ./app/logs/screenshots:/screenshots
@@ -40,7 +39,8 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
 volumes:
   db_data:

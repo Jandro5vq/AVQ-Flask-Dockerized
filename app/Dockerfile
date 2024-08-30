@@ -7,6 +7,8 @@ RUN apt-get update && \
     wget \
     unzip \
     libnss3 \
+    pkg-config \
+    default-libmysqlclient-dev \
     libgbm-dev \
     libx11-xcb1 \
     libxcomposite1 \

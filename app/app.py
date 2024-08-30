@@ -1,13 +1,24 @@
 from flask import *
-from misterscrapper import UpdateMisterData
-import pymysql
-import os
+from flask_mysqldb import MySQL
+from misterscrapper import get_player_list, get_all_jornada_points
 from dotenv import load_dotenv
 from db.mister.misterdb import *
+import os
+import logging
 
 app = Flask(__name__)
 
+logging.basicConfig(level=logging.DEBUG)
+
 load_dotenv()
+
+# ==== BASE DE DATOS ====
+app.config['MYSQL_HOST'] = 'db'
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
+
+db = MySQL(app)
 
 # Datos de ejemplo
 jugadores = [
@@ -16,17 +27,6 @@ jugadores = [
     {'nombre': 'Jugador 3', 'puntos': {'jornada1': 7, 'jornada2': 14, 'jornada3': 12}},
     {'nombre': 'Jugador 4', 'puntos': {'jornada1': 9, 'jornada2': 10, 'jornada3': 11}},
 ]
-
-# ==== BASE DE DATOS ====
-def get_db_connection():
-    """Obtiene una conexión a la base de datos."""
-    return pymysql.connect(
-        host='localhost',
-        user=os.getenv('MYSQL_USER'),
-        password=os.getenv('MYSQL_PASSWORD'),
-        database=os.getenv('MYSQL_DATABASE'),
-        cursorclass=pymysql.cursors.DictCursor
-    )
 
 # ==== RUTAS ====
 # Portfolio
@@ -64,11 +64,30 @@ def misterlogin():
 # UC Mister
 @app.route('/api/misterupdate', methods=['POST'])
 def misterupdate():
-    success, standings = UpdateMisterData()
+    success, jornadas = get_all_jornada_points()
     if not success:
         return {"message": "Error Updating"}, 400
-    return jsonify(standings), 200
+    
+    success = upsert_points(db, jornadas)
 
+    if success:
+        return {"message": "OK"}, 200
+
+    else:
+        return {"message": "Error Updating"}, 400
+
+@app.route('/api/playersupdate', methods=['POST'])
+def playersupdate():
+    success, players = get_player_list()
+    if not success:
+        return {"message": "Error Updating"}, 400
+
+    success = upsert_player(db, players)
+
+    if success:
+        return {"message": "OK"}, 200
+    else:
+        return {"message": "Error Updating"}, 400
 
 @app.route('/api/jornada', methods=['GET'])
 def obtener_puntos():
