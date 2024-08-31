@@ -34,7 +34,7 @@ def upsert_player(db, players):
     sql_insert = '''
     INSERT INTO players (username, name, image)
     VALUES (%s, %s, %s)
-    ON DUPLICATE KEY UPDATE username = VALUES(username);
+    ON DUPLICATE KEY UPDATE name = VALUES(name), image = VALUES(image);
     '''
 
     try:
@@ -68,21 +68,15 @@ def upsert_points(db, jornadas):
     ON DUPLICATE KEY UPDATE points = VALUES(points);
     '''
 
-    sql_insert_player_debts = '''
-    INSERT INTO player_debts (player_id, amount)
-    VALUES (%s, %s)
-    ON DUPLICATE KEY UPDATE amount = VALUES(amount);
-    '''
-
     try:
         with db.connection.cursor() as cur:
             logging.debug("Iniciando el proceso de upsert en la base de datos.")
-            point_db(db, cur)
-            
+            point_db(db, cur)  # Ensure this function is defined
+
             for x, jornada in enumerate(jornadas):
                 num = x + 1
                 cur.execute(sql_insert_round, (num, f"Jornada {num}"))
-                
+
                 if cur.lastrowid:
                     round_id = cur.lastrowid
                 else:
@@ -105,80 +99,129 @@ def upsert_points(db, jornadas):
     except Exception as e:
         db.connection.rollback()
         logging.error(f"Error durante el upsert: {e}", exc_info=True)
-        return 
+        return False  # Explicitly return False in case of an error
 
-
-def calcular_y_actualizar_deudas(mysql):
+def get_rounds(db):
     try:
-        cur = mysql.connection.cursor()
+        cur = db.connection.cursor()
+        point_db(db, cur)
+        query = 'SELECT num, name FROM rounds'
+        cur.execute(query)
+        result = cur.fetchall()
+        cur.close()
+        
+        return dict(result)
+            
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
 
-        # Paso 1: Obtener todas las rondas y los puntos de los jugadores para cada ronda
+def get_jornada(db, num):
+    try:
+        cur = db.connection.cursor()
+        point_db(db, cur)
+        query = '''
+        SELECT p.username, p.name, p.image, pp.points
+        FROM players p
+        JOIN player_points pp ON p.id = pp.player_id
+        JOIN rounds r ON pp.round_id = r.id
+        WHERE r.num = %s
+        ORDER BY points DESC;
+        '''
+        cur.execute(query % num)
+        result = cur.fetchall()
+        cur.close()
+        
+        return result
+            
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+def calcular_y_actualizar_deudas(db):
+    try:
+        cur = db.connection.cursor()
+
+        # Obtener todas las rondas disponibles
+        cur.execute("SELECT num FROM rounds")
+        rounds = cur.fetchall()
+        rounds = [x[0] for x in rounds]
+        
+        all_rounds_scores = {}
+        
+        for num in rounds:
+            cur.execute("""
+                    SELECT player_id, points
+                    FROM player_points
+                    WHERE round_id = %s
+                    ORDER BY points DESC
+                """ % num)
+            
+            player_points = cur.fetchall()
+            all_rounds_scores[num] = player_points
+        
+            menores = {}
+            for jornada, datos in all_rounds_scores.items():
+                # Ordenar por puntuación
+                datos_ordenados = sorted(datos, key=lambda x: x[1])
+                
+                # Agrupar usuarios por puntuación
+                grupos = {}
+                for usuario, puntos in datos_ordenados:
+                    if puntos not in grupos:
+                        grupos[puntos] = []
+                    grupos[puntos].append(usuario)
+                
+                # Tomar las tres primeras puntuaciones con usuarios
+                menores[jornada] = {}
+                for i, (puntos, usuarios) in enumerate(grupos.items()):
+                    if i < 3:
+                        menores[jornada][puntos] = usuarios
+                    else:
+                        break
+        
         cur.execute("""
-            SELECT round_id, player_id, points
-            FROM player_points
-            ORDER BY round_id, points DESC
-        """)
-        results = cur.fetchall()
-
-        if not results:
-            return "No hay datos para calcular las deudas", 404
-
-        # Paso 2: Crear un diccionario para almacenar las deudas acumuladas
+                    SELECT COUNT(*) FROM players
+                """)
+            
+        player_num = cur.fetchall()[0][0]
+        
         debts = {}
         
-        # Paso 3: Calcular deudas acumuladas
-        current_round = None
-        for round_id, player_id, points in results:
-            if round_id != current_round:
-                # Al cambiar de ronda, identificar los tres últimos jugadores de la ronda anterior
-                if current_round is not None:
-                    # Determinar los últimos tres jugadores
-                    sorted_players = sorted(round_points.items(), key=lambda x: x[1])
-                    last_three = sorted_players[-3:]
-                    min_points = last_three[0][1]
-                    involved_in_tie = [player_id for player_id, points in last_three if points == min_points]
+        sql_insert_debts_history = '''
+        INSERT INTO player_debts_history (player_id, round_id, amount)
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE amount = VALUES(amount);
+        '''
+        
+        for id in range(player_num):
+            id += 1
+            debts[id] = 0
+            for jornum, jor in enumerate(menores):
+                for debs in menores[jor]:
+                    if [id] == menores[jor][debs]:
+                        debts[id] += 2
+                        cur.execute(sql_insert_debts_history % (deb, jornum, 2))
+                    elif id in menores[jor][debs] and len(menores[jor][debs]) > 1:
+                        debts[id] += 1
+                        cur.execute(sql_insert_debts_history % (deb, jornum, 1))
+                    else:
+                        debts[id] += 0
+        
+        for deb in debts:
+            sql_insert_debts = '''
+            INSERT INTO player_debts (player_id, amount)
+            VALUES (%s, %s)
+            ON DUPLICATE KEY UPDATE amount = VALUES(amount);
+            '''
+            cur.execute(sql_insert_debts, (deb, debts[deb]))
 
-                    for pid, points in last_three:
-                        if pid in involved_in_tie:
-                            debts[pid] = debts.get(pid, 0) + 1
-                        else:
-                            debts[pid] = debts.get(pid, 0) + 2
-                
-                # Reiniciar para la nueva ronda
-                round_points = {}
-                current_round = round_id
-
-            # Agregar puntos de jugadores para la ronda actual
-            round_points[player_id] = points
-
-        # Procesar la última ronda
-        sorted_players = sorted(round_points.items(), key=lambda x: x[1])
-        last_three = sorted_players[-3:]
-        min_points = last_three[0][1]
-        involved_in_tie = [player_id for player_id, points in last_three if points == min_points]
-
-        for pid, points in last_three:
-            if pid in involved_in_tie:
-                debts[pid] = debts.get(pid, 0) + 1
-            else:
-                debts[pid] = debts.get(pid, 0) + 2
-
-        # Paso 4: Actualizar la tabla player_debts con la deuda total
-        cur.execute("TRUNCATE TABLE player_debts")  # Limpiar tabla antes de actualizar
-
-        for player_id, total_debt in debts.items():
-            cur.execute("""
-                INSERT INTO player_debts (player_id, amount)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE amount = %s
-            """, (player_id, total_debt, total_debt))
-
-        mysql.connection.commit()
+        db.connection.commit()
 
         return "Deudas calculadas y actualizadas correctamente."
 
     except Exception as e:
-        mysql.connection.rollback()
+        db.connection.rollback()
         return f"Error al calcular o actualizar deudas: {str(e)}"
 
     finally:

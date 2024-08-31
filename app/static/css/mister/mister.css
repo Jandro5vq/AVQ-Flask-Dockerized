@@ -1,48 +1,108 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
+* {
     margin: 0;
     padding: 0;
+    font-family: "SUSE", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
 }
 
-.container {
-    width: 80%;
-    margin: 50px auto;
-    background-color: #fff;
+body {
+    background-color: #4B4B49;
+}
+
+.standings {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
-    text-align: center;
-    color: #444;
+.jornada-select {
+    margin: 10px;
 }
 
-select {
-    display: block;
-    margin: 20px auto;
-    padding: 10px;
-    font-size: 16px;
+.jornada-select select {
+    -webkit-appearance: none; /* For Safari and Chrome */
+    -moz-appearance: none; /* For Firefox */
+    appearance: none;
+    font-size: 1.15rem;
+    font-weight: bold;
+    padding: 10px 20px;
+    background-color: #3f3f3f;
+    border: none;
+    border-radius: 0.25rem;
+    color: #f5f5dc;
+    cursor: pointer;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+.user-list {
+    list-style-type: none;
+    width: 50%;
 }
 
-th, td {
-    padding: 12px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
+.user-row {
+    justify-content: space-between;
+    background-color: #3f3f3f;
+    transition: background-color 0.3s ease;
 }
 
-th {
-    background-color: #007BFF;
-    color: white;
+.user-row:hover {
+    background-color: #2f2f2f;
 }
 
-tbody tr:hover {
-    background-color: #f1f1f1;
+.user-info {
+    flex: 1;
+}
+
+.user-row,
+.user-info {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    color: #f5f5dc;
+}
+
+.user-pos,
+.user-names,
+.user-points,
+.user-debt {
+    margin: 5px 10px;
+}
+
+.user-list > li:first-child > .user-row {
+    border-radius: 10px 10px 0px 0px;
+}
+
+.user-list > li:last-child > .user-row {
+    border-radius: 0px 0px 10px 10px;
+}
+
+.user-image {
+    width: 40px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    margin: 5px 15px;
+}
+
+.user-name {
+    font-size: larger;
+    font-weight: bold;
+}
+
+.user-username {
+    font-size: small;
+    color: #f5f5dcb9;
+}
+
+.user-debt {
+    color: #f5f5dcb9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .user-list {
+        width: 90%;
+    }
 }

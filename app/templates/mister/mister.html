@@ -3,29 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
     <title>Tabla de Puntuaciones</title>
     <link rel="stylesheet" href="/static/css/mister/mister.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Selecciona una Jornada</h1>
-        <select id="selector-jornada">
-            <option value="jornada1">Jornada 1</option>
-            <option value="jornada2">Jornada 2</option>
-            <option value="jornada3">Jornada 3</option>
-        </select>
-        
-        <table id="tabla-puntuaciones">
-            <thead>
-                <tr>
-                    <th>Jugador</th>
-                    <th>Puntos</th>
-                </tr>
-            </thead>
-            <tbody id="cuerpo-tabla">
-                <!-- Las filas se generarán dinámicamente -->
-            </tbody>
-        </table>
+    <div class="standings">
+        <div class="jornada-select">
+            <select id="selector-jornada">
+                <option value="1">Jornada 1</option>
+                <option value="2">Jornada 2</option>
+                <option value="3">Jornada 3</option>
+            </select>
+        </div>
+        <ul class="user-list" id="user-list">
+            <li>
+                <div class="user-row">
+                    <p class="user-pos">1</p>
+                    <div class="user-info">
+                        <img class="user-image"
+                            src="https://cdn-mister.mundodeportivo.com/file/cdn-mister/users/66ad185a06894.png" />
+                        <div class="user-names">
+                            <p class="user-name">Alejandro</p>
+                            <p class="user-username">Jandro</p>
+                        </div>
+                    </div>
+                    <p class="user-points">10 PTS</p>
+                    <p class="user-debt">+2€</p>
+                </div>
+            </li>
+        </ul>
     </div>
     <script src="/static/js/mister/mister.js"></script>
 </body>

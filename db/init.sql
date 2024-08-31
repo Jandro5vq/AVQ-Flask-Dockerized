@@ -20,6 +20,7 @@ CREATE TABLE player_points (
     player_id INT NOT NULL,
     round_id INT NOT NULL,
     points INT NOT NULL,
+    UNIQUE KEY unique_player_round (player_id, round_id),
     FOREIGN KEY (player_id) REFERENCES players(id),
     FOREIGN KEY (round_id) REFERENCES rounds(id),
     CHECK (points >= 0)
@@ -30,5 +31,16 @@ CREATE TABLE player_debts (
     player_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (player_id) REFERENCES players(id),
+    CHECK (amount >= 0)
+);
+
+CREATE TABLE player_debts_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    player_id INT NOT NULL,
+    round_id INT NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    UNIQUE KEY unique_player_round (player_id, round_id),
+    FOREIGN KEY (player_id) REFERENCES players(id),
+    FOREIGN KEY (round_id) REFERENCES rounds(id),
     CHECK (amount >= 0)
 );

@@ -1,24 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
     const selectorJornada = document.getElementById('selector-jornada');
-    const cuerpoTabla = document.getElementById('cuerpo-tabla');
+    const cuerpoTabla = document.getElementById('user-list');
 
     function cargarPuntuaciones(jornada) {
         fetch(`/api/jornada?jornada=${jornada}`)
             .then(response => response.json())
             .then(puntuaciones => {
-                cuerpoTabla.innerHTML = '';
-                puntuaciones.forEach(jugador => {
-                    const fila = document.createElement('tr');
-                    const celdaNombre = document.createElement('td');
-                    const celdaPuntos = document.createElement('td');
-
-                    celdaNombre.textContent = jugador.nombre;
-                    celdaPuntos.textContent = jugador.puntos;
-
-                    fila.appendChild(celdaNombre);
-                    fila.appendChild(celdaPuntos);
-
-                    cuerpoTabla.appendChild(fila);
+                cuerpoTabla.innerHTML = ''
+                puntuaciones.forEach(function (jugador, i) {
+                    cuerpoTabla.innerHTML += `
+                    <li>
+                        <div class="user-row">
+                            <p class="user-pos">${i+1}</p>
+                            <div class="user-info">
+                                <img class="user-image"
+                                    src="${jugador.img}" />
+                                <div class="user-names">
+                                    <p class="user-name">${jugador.name}</p>
+                                    <p class="user-username">${jugador.username}</p>
+                                </div>
+                            </div>
+                            <p class="user-points">${jugador.points} PTS</p>
+                            <p class="user-debt">+2€</p>
+                        </div>
+                    </li>
+                    `
                 });
             })
             .catch(error => console.error('Error:', error));
