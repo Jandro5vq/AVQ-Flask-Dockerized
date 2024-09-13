@@ -2,6 +2,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectorJornada = document.getElementById('selector-jornada');
     const cuerpoTabla = document.getElementById('user-list');
 
+   
+    function cargarJornadas(){
+        fetch(`/api/numjornadas`)
+        .then(response => response.json())
+        .then(jornadas => {
+            selectorJornada.innerHTML = '';
+            for (var jornada in jornadas ){
+                selectorJornada.innerHTML += `
+                <option value="${jornada}">${jornadas[jornada]}</option>`;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
     function cargarPuntuaciones(jornada) {
         fetch(`/api/jornada?jornada=${jornada}`)
             .then(response => response.json())
@@ -36,5 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Cargar la jornada 1 por defecto al cargar la página
+    cargarJornadas();
     cargarPuntuaciones(selectorJornada.value);
 });

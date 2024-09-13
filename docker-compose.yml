@@ -8,6 +8,11 @@ services:
     environment:
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MISTER_USERNAME=${MISTER_USERNAME}
+      - MISTER_PASSWORD=${MISTER_PASSWORD}
     volumes:
       - ./app:/app
       - ./app/logs/screenshots:/screenshots
