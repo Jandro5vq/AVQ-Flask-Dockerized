@@ -116,17 +116,49 @@ def get_rounds(db):
         print(f"Error: {e}")
         return None
 
+def get_debts(db):
+    try:
+        cur = db.connection.cursor()
+        point_db(db, cur)
+        query = '''
+        SELECT 
+            p.name AS Nombre_Usuario,
+            COALESCE(SUM(CASE WHEN r.num = 1 THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada1,
+            COALESCE(SUM(CASE WHEN r.num = 2 THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada2,
+            COALESCE(SUM(CASE WHEN r.num = 3 THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada3,
+            COALESCE(SUM(pdh.amount), 0) AS Deuda_Total
+        FROM players p
+        LEFT JOIN player_debts_history pdh ON p.id = pdh.player_id
+        LEFT JOIN rounds r ON pdh.round_id = r.id
+        GROUP BY p.username
+        ORDER BY Deuda_Total DESC;'''
+        cur.execute(query)
+        result = cur.fetchall()
+        cur.close()
+        
+        print(result)
+        return result
+            
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
 def get_jornada(db, num):
     try:
         cur = db.connection.cursor()
         point_db(db, cur)
         query = '''
-        SELECT p.username, p.name, p.image, pp.points
+        SELECT p.username, 
+            p.name, 
+            p.image, 
+            pp.points, 
+            COALESCE(dh.amount, 0) AS amount
         FROM players p
         JOIN player_points pp ON p.id = pp.player_id
         JOIN rounds r ON pp.round_id = r.id
+        LEFT JOIN player_debts_history dh ON p.id = dh.player_id AND r.id = dh.round_id
         WHERE r.num = %s
-        ORDER BY points DESC;
+        ORDER BY pp.points DESC;
         '''
         cur.execute(query % num)
         result = cur.fetchall()
@@ -139,9 +171,8 @@ def get_jornada(db, num):
         return None
 
 def calcular_y_actualizar_deudas(db):
+    cur = db.connection.cursor()
     try:
-        cur = db.connection.cursor()
-
         # Obtener todas las rondas disponibles
         cur.execute("SELECT num FROM rounds")
         rounds = cur.fetchall()
@@ -155,36 +186,33 @@ def calcular_y_actualizar_deudas(db):
                     FROM player_points
                     WHERE round_id = %s
                     ORDER BY points DESC
-                """ % num)
+                """, (num,))
             
             player_points = cur.fetchall()
             all_rounds_scores[num] = player_points
         
-            menores = {}
-            for jornada, datos in all_rounds_scores.items():
-                # Ordenar por puntuación
-                datos_ordenados = sorted(datos, key=lambda x: x[1])
-                
-                # Agrupar usuarios por puntuación
-                grupos = {}
-                for usuario, puntos in datos_ordenados:
-                    if puntos not in grupos:
-                        grupos[puntos] = []
-                    grupos[puntos].append(usuario)
-                
-                # Tomar las tres primeras puntuaciones con usuarios
-                menores[jornada] = {}
-                for i, (puntos, usuarios) in enumerate(grupos.items()):
-                    if i < 3:
-                        menores[jornada][puntos] = usuarios
-                    else:
-                        break
-        
-        cur.execute("""
-                    SELECT COUNT(*) FROM players
-                """)
+        menores = {}
+        for jornada, datos in all_rounds_scores.items():
+            # Ordenar por puntuación
+            datos_ordenados = sorted(datos, key=lambda x: x[1])
             
-        player_num = cur.fetchall()[0][0]
+            # Agrupar usuarios por puntuación
+            grupos = {}
+            for usuario, puntos in datos_ordenados:
+                if puntos not in grupos:
+                    grupos[puntos] = []
+                grupos[puntos].append(usuario)
+            
+            # Tomar las tres primeras puntuaciones con usuarios
+            menores[jornada] = {}
+            for i, (puntos, usuarios) in enumerate(grupos.items()):
+                if i < 3:
+                    menores[jornada][puntos] = usuarios
+                else:
+                    break
+        
+        cur.execute("SELECT COUNT(*) FROM players")
+        player_num = cur.fetchone()[0]
         
         debts = {}
         
@@ -194,26 +222,25 @@ def calcular_y_actualizar_deudas(db):
         ON DUPLICATE KEY UPDATE amount = VALUES(amount);
         '''
         
-        for id in range(player_num):
-            id += 1
+        for id in range(1, player_num + 1):
             debts[id] = 0
-            for jornum, jor in enumerate(menores):
-                for debs in menores[jor]:
-                    if [id] == menores[jor][debs]:
+            for jornum, jor in menores.items():
+                for debs, users in jor.items():
+                    if [id] == users:
                         debts[id] += 2
-                        cur.execute(sql_insert_debts_history % (deb, jornum, 2))
-                    elif id in menores[jor][debs] and len(menores[jor][debs]) > 1:
+                        cur.execute(sql_insert_debts_history, (id, jornum, 2))
+                    elif id in users and len(users) > 1:
                         debts[id] += 1
-                        cur.execute(sql_insert_debts_history % (deb, jornum, 1))
+                        cur.execute(sql_insert_debts_history, (id, jornum, 1))
                     else:
                         debts[id] += 0
         
+        sql_insert_debts = '''
+        INSERT INTO player_debts (player_id, amount)
+        VALUES (%s, %s)
+        ON DUPLICATE KEY UPDATE amount = VALUES(amount);
+        '''
         for deb in debts:
-            sql_insert_debts = '''
-            INSERT INTO player_debts (player_id, amount)
-            VALUES (%s, %s)
-            ON DUPLICATE KEY UPDATE amount = VALUES(amount);
-            '''
             cur.execute(sql_insert_debts, (deb, debts[deb]))
 
         db.connection.commit()
