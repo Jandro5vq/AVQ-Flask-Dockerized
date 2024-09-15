@@ -4,18 +4,72 @@
     font-family: "SUSE", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
+    color: beige;
+    font-size: 1.05rem;
 }
 
 body {
     background-color: #4B4B49;
-}
-
-.standings {
     display: flex;
     flex-direction: column;
-    flex-wrap: nowrap;
     align-items: center;
-    padding: 20px;
+}
+
+h1{
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+}
+
+/* Button Styles */
+#update {
+    position: relative;
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    background-color: beige;
+    color: #232628;
+    border-radius: 5px;
+}
+
+#update span{
+    color: #232628;
+    font-weight: bold;
+}
+
+/* Spinner Styles */
+.spinner {
+    border: 4px solid #232628; /* Light grey */
+    border-left: 4px solid #23262875; /* White */
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    top: 50%;
+    left: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none;
+}
+
+
+#update:hover{
+    background-color: rgb(207, 207, 184);
+}
+
+.centered-cont {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
 }
 
 .jornada-select {
@@ -23,8 +77,6 @@ body {
 }
 
 .jornada-select select {
-    -webkit-appearance: none; /* For Safari and Chrome */
-    -moz-appearance: none; /* For Firefox */
     appearance: none;
     font-size: 1.15rem;
     font-weight: bold;
@@ -36,73 +88,88 @@ body {
     cursor: pointer;
 }
 
-.user-list {
-    list-style-type: none;
-    width: 50%;
+#leaderboard-table, #debts-table {
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 1000px;
+    margin: 0 auto;
+    overflow: auto;
 }
 
-.user-row {
-    justify-content: space-between;
-    background-color: #3f3f3f;
-    transition: background-color 0.3s ease;
+.tabulator {
+    border: none !important;
+    border-radius: 8px;
 }
 
-.user-row:hover {
-    background-color: #2f2f2f;
+.tabulator .tabulator-header {
+    background-color: #232628 !important;
 }
 
-.user-info {
-    flex: 1;
+.tabulator .tabulator-header .tabulator-col {
+    background-color: #232628 !important;
+    border: none !important;
 }
 
-.user-row,
-.user-info {
+.tabulator .tabulator-tableholder .tabulator-table {
+    background-color: transparent !important;
+}
+
+.tabulator-row {
+    background-color: #2f3335 !important; /* Línea normal */
+    border-bottom: none !important;
+    color: #eaf0ce; /* Texto principal */
+}
+
+.tabulator-row:nth-child(even) {
+    background-color: #292d2f !important; /* Línea par */
+}
+
+.tabulator-row:hover {
+    background-color: #232628 !important; /* Hover */
+}
+
+.tabulator-cell {
+    padding: 10px 5px !important;
+    vertical-align: middle;
+    border-right: none !important;
+    color: #eaf0ce; /* Texto principal */
+}
+
+.profile-info {
     display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
     align-items: center;
-    color: #f5f5dc;
 }
 
-.user-pos,
-.user-names,
-.user-points,
-.user-debt {
-    margin: 5px 10px;
+.profile-info .names {
+    padding-left: 10px;
 }
 
-.user-list > li:first-child > .user-row {
-    border-radius: 10px 10px 0px 0px;
+.profile-info .username {
+    color: #bec3ab; /* Texto secundario */
 }
 
-.user-list > li:last-child > .user-row {
-    border-radius: 0px 0px 10px 10px;
-}
-
-.user-image {
-    width: 40px;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    margin: 5px 15px;
-}
-
-.user-name {
-    font-size: larger;
+.profile-info .name {
+    color: #eaf0ce; /* Texto principal */
     font-weight: bold;
 }
 
-.user-username {
-    font-size: small;
-    color: #f5f5dcb9;
+.tabulator-cell img {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
 }
 
-.user-debt {
-    color: #f5f5dcb9;
+footer{
+    text-align: center;
+    margin: 5px 0px;
+    font-weight: lighter;
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
-    .user-list {
-        width: 90%;
+    #leaderboard-table, #debts-table {
+        max-width: 100%;
     }
+
+
 }

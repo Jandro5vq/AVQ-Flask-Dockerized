@@ -1,3 +1,4 @@
 .env
 .venv
 screenshots
+nginx/nginx.conf.local

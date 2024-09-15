@@ -120,18 +120,27 @@ def get_debts(db):
     try:
         cur = db.connection.cursor()
         point_db(db, cur)
-        query = '''
+        
+        # Obtener todas las jornadas disponibles
+        cur.execute('SELECT DISTINCT num FROM rounds ORDER BY num')
+        jornadas = [row[0] for row in cur.fetchall()]
+        
+        # Construir la consulta SQL dinámicamente
+        select_clause = ', '.join(
+            [f"COALESCE(SUM(CASE WHEN r.num = {jornada} THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada{jornada}" for jornada in jornadas]
+        )
+        
+        query = f'''
         SELECT 
             p.name AS Nombre_Usuario,
-            COALESCE(SUM(CASE WHEN r.num = 1 THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada1,
-            COALESCE(SUM(CASE WHEN r.num = 2 THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada2,
-            COALESCE(SUM(CASE WHEN r.num = 3 THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada3,
+            {select_clause},
             COALESCE(SUM(pdh.amount), 0) AS Deuda_Total
         FROM players p
         LEFT JOIN player_debts_history pdh ON p.id = pdh.player_id
         LEFT JOIN rounds r ON pdh.round_id = r.id
-        GROUP BY p.username
+        GROUP BY p.name
         ORDER BY Deuda_Total DESC;'''
+
         cur.execute(query)
         result = cur.fetchall()
         cur.close()
@@ -142,6 +151,7 @@ def get_debts(db):
     except Exception as e:
         print(f"Error: {e}")
         return None
+
 
 def get_jornada(db, num):
     try:

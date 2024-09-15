@@ -1,75 +1,83 @@
-/* styles.css */
-
-/* Estilo general para el cuerpo de la página */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    color: beige;
+    font-family: "SUSE", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
 }
 
-/* Estilo para el contenedor del formulario de login */
-.login-container {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    width: 300px;
+body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4B4B49;
+    height: 100dvh;
+
+}
+
+.login-container{
+    background-color: #3f3f3f;
+    padding: 40px;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 40%;
+}
+
+img{
+    width: 150px;
+    aspect-ratio: 1;
+    border-radius: 30%;
+    margin: 10px;
+}
+
+h2{
+    font-size: 2rem;
+    margin: 10px;
     text-align: center;
 }
 
-/* Estilo para los títulos */
-h2 {
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: #333;
-}
-
-/* Estilo para los párrafos de error */
-p {
-    color: red;
-    font-size: 14px;
-    margin-bottom: 20px;
-}
-
-/* Estilo para el formulario */
-form {
+form{
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
-/* Estilo para las etiquetas */
-label {
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: #666;
-    text-align: left;
+label{
+    margin-bottom: 5px;
 }
 
-/* Estilo para los campos de entrada */
 input[type="password"] {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    background-color: #4B4B49;
+    padding: 10px; /* Comfortable padding */
+    border: 1px solid #232628;
+    border-radius: 6px; /* Rounded corners */
     margin-bottom: 20px;
-    font-size: 16px;
+    font-size: 1.5rem; /* Font size for input fields */
 }
 
-/* Estilo para el botón de enviar */
 button {
     background-color: #007bff;
     color: white;
     border: none;
-    padding: 10px;
-    border-radius: 4px;
+    padding: 10px; /* Comfortable padding */
+    border-radius: 6px; /* Rounded corners */
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1.5rem; /* Font size for button text */
+    margin-bottom: 20px;
 }
 
-button:hover {
-    background-color: #0056b3;
+button:hover{
+    background-color: #006cdf;
+
 }
+
+@media (max-width: 600px) {
+    .login-container{
+        width: 80%;
+    }
+  }

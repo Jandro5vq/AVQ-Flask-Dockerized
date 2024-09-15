@@ -1,41 +1,38 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/mister/mister.css">
+    <link rel="shortcut icon" href="/static/images/mister-icon.webp" type="image/x-icon">
+    <link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
-    <title>Tabla de Puntuaciones</title>
-    <link rel="stylesheet" href="/static/css/mister/mister.css">
+    <title>UC Mister</title>
 </head>
 <body>
-    <div class="standings">
-        <div class="jornada-select">
-            <select id="selector-jornada">
-                <option value="1">Jornada 1</option>
-                <option value="2">Jornada 2</option>
-                <option value="3">Jornada 3</option>
-            </select>
+    <div class="tables">
+        
+        <div class="centered-cont">
+            <h1>Puntos por jornada</h1>
+            <div class="jornada-select">
+                <select id="selector-jornada">
+                </select>
+            </div>
+            <div id="leaderboard-table"></div>
         </div>
-        <ul class="user-list" id="user-list">
-            <li>
-                <div class="user-row">
-                    <p class="user-pos">1</p>
-                    <div class="user-info">
-                        <img class="user-image"
-                            src="https://cdn-mister.mundodeportivo.com/file/cdn-mister/users/66ad185a06894.png" />
-                        <div class="user-names">
-                            <p class="user-name">Alejandro</p>
-                            <p class="user-username">Jandro</p>
-                        </div>
-                    </div>
-                    <p class="user-points">10 PTS</p>
-                    <p class="user-debt">+2€</p>
-                </div>
-            </li>
-        </ul>
+        <div class="centered-cont">
+            <h1>Deudas totales</h2>
+            <div id="debts-table"></div>
+        </div>
     </div>
-    <script src="/static/js/mister/mister.js"></script>
+    <button id="update">
+        <span class="button-text">Actualizar</span>
+        <div class="spinner hidden"></div>
+    </button>
+    <footer>AVQ - 2024</footer>
 </body>
+<script src="/static/js/mister/mister.js"></script>
 </html>
