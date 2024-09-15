@@ -96,6 +96,10 @@ h1{
     overflow: auto;
 }
 
+#leaderboard-table > div.tabulator-tableholder > div > div > div:nth-child(4){
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
 .tabulator {
     border: none !important;
     border-radius: 8px;
@@ -146,6 +150,8 @@ h1{
 
 .profile-info .username {
     color: #bec3ab; /* Texto secundario */
+    max-width: 150px;
+    text-wrap: balance;
 }
 
 .profile-info .name {

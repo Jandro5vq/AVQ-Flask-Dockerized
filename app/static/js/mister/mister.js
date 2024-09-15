@@ -34,7 +34,7 @@ function initializeLeaderboardTable(leaderboardData) {
 
 function initializeDebtsTable(debtData) {
     function formatDebt(value) {
-        return value === "0.00" ? "--" : `+${Math.round(parseFloat(value))}€`;
+        return value === "0.00" ? "-" : `${Math.round(parseFloat(value))}`;
     }
 
     const numberOfJornadas = debtData[0].length - 2;
@@ -68,7 +68,7 @@ function initializeDebtsTable(debtData) {
         field: "total",
         hozAlign: "center",
         headerHozAlign: "center",
-        formatter: (cell) => `+${Math.round(parseFloat(cell.getValue()))}€`,
+        formatter: (cell) => `${Math.round(parseFloat(cell.getValue()))}€`,
         frozen: true,
         headerSort: false,
         resizable: false
