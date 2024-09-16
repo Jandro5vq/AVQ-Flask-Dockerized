@@ -183,6 +183,9 @@ def get_jornada(db, num):
 def calcular_y_actualizar_deudas(db):
     cur = db.connection.cursor()
     try:
+        # Vaciar la tabla de historial de deudas
+        cur.execute("DELETE FROM player_debts_history")
+
         # Obtener todas las rondas disponibles
         cur.execute("SELECT num FROM rounds")
         rounds = cur.fetchall()
