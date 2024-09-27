@@ -181,6 +181,7 @@ def get_jornada(db, num):
         return None
 
 def calcular_y_actualizar_deudas(db):
+    logging.info("CALC DEUDAS")
     cur = db.connection.cursor()
     try:
         # Vaciar la tabla de historial de deudas
@@ -190,10 +191,13 @@ def calcular_y_actualizar_deudas(db):
         cur.execute("SELECT num FROM rounds")
         rounds = cur.fetchall()
         rounds = [x[0] for x in rounds]
+
+        logging.info(rounds)
         
         all_rounds_scores = {}
         
         for num in rounds:
+            logging.info(num)
             cur.execute("""
                     SELECT player_id, points
                     FROM player_points
