@@ -17,18 +17,28 @@ function debtFormatter(cell) {
 }
 
 function initializeLeaderboardTable(leaderboardData) {
-    new Tabulator("#leaderboard-table", {
+    const tabla = new Tabulator("#leaderboard-table", {
         data: leaderboardData,
-        layout: "fitDataTable",
+        layout: "fitColumns",
         headerVisible: false,
         columns: [
-            { title: "Rank", field: "rank", hozAlign: "center", vertAlign: "middle", formatter: "rownum", headerSort: false, resizable: false },
-            { title: "Profile", field: "profile", hozAlign: "left", vertAlign: "middle", formatter: profileFormatter, headerSort: false, resizable: false },
-            { title: "Points", field: "points", hozAlign: "center", vertAlign: "middle", formatter: (cell) => `${cell.getValue()} PTS`, headerSort: false, resizable: false },
-            { title: "Debt", field: "debt", hozAlign: "center", vertAlign: "middle", formatter: debtFormatter, headerSort: false, resizable: false }
+            { title: "Rank", field: "rank", hozAlign: "center", vertAlign: "middle", formatter: "rownum", headerSort: false, resizable: false},
+            { title: "Profile", field: "profile", hozAlign: "left", vertAlign: "middle", formatter: profileFormatter, headerSort: false, resizable: false, widthGrow:3},
+            { title: "Points", field: "points", hozAlign: "center", vertAlign: "middle", formatter: (cell) => `${cell.getValue()} PTS`, headerSort: false, resizable: false},
+            { title: "Debt", field: "debt", hozAlign: "center", vertAlign: "middle", formatter: debtFormatter, headerSort: false, resizable: false}
         ],
         movableColumns: false,
         resizableColumns: false
+    });
+
+    tabla.on("tableBuilt", function() {
+        // Usar setTimeout para asegurarse de que se ha renderizado
+        setTimeout(() => {
+            const scrollDiv = document.querySelector("#miTabla .tabulator-tableHolder");
+            if (scrollDiv) {
+                scrollDiv.scrollLeft = scrollDiv.scrollWidth; // Desplazarse al final
+            }
+        }, 400); // Prueba con 100 ms
     });
 }
 

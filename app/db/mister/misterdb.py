@@ -117,12 +117,6 @@ def get_rounds(db):
         return None
 
 def get_debts(db):
-    """
-    Obtiene las deudas de los jugadores por jornada y la deuda total.
-
-    :param db: Objeto de conexión a la base de datos.
-    :return: Lista de tuplas con deudas por jornada y deuda total.
-    """
     try:
         cur = db.connection.cursor()
         point_db(db, cur)
@@ -133,7 +127,7 @@ def get_debts(db):
         
         # Construir la consulta SQL dinámicamente
         select_clause = ', '.join(
-            [f"COALESCE(SUM(CASE WHEN r.num = %s THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada{jornada}" for jornada in jornadas]
+            [f"COALESCE(SUM(CASE WHEN r.num = {jornada} THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada{jornada}" for jornada in jornadas]
         )
         
         query = f'''
@@ -147,10 +141,7 @@ def get_debts(db):
         GROUP BY p.name
         ORDER BY Deuda_Total DESC;'''
 
-        # Ejecutar la consulta con parámetros
-        params = jornadas  # Los parámetros se deben proporcionar en el mismo orden
-        cur.execute(query, params)
-        
+        cur.execute(query)
         result = cur.fetchall()
         cur.close()
         
@@ -159,8 +150,6 @@ def get_debts(db):
             
     except Exception as e:
         print(f"Error: {e}")
-        if cur:
-            cur.close()  # Asegurarse de cerrar el cursor en caso de error
         return None
 
 
@@ -193,7 +182,7 @@ def get_jornada(db, num):
         return None
 
 def calcular_y_actualizar_deudas(db):
-    logging.info("CALC DEUDAS")
+    # logging.info("CALC DEUDAS")
     cur = db.connection.cursor()
     try:
         # Vaciar la tabla de historial de deudas
@@ -204,74 +193,68 @@ def calcular_y_actualizar_deudas(db):
         rounds = cur.fetchall()
         rounds = [x[0] for x in rounds]
 
-        logging.info("Rounds: " + rounds)
-        
+        # Obtener el número de jugadores
+        cur.execute("SELECT COUNT(id) FROM players")
+        num_jugadores = cur.fetchone()[0]  # Extraer el valor directamente
+        # logging.info(f'Número de jugadores: {num_jugadores}')
+
         all_rounds_scores = {}
         
         for num in rounds:
-            logging.info(num)
             cur.execute("""
                     SELECT player_id, points
                     FROM player_points
                     WHERE round_id = %s
                     ORDER BY points DESC
                 """, (num,))
-            
             player_points = cur.fetchall()
             all_rounds_scores[num] = player_points
         
-        menores = {}
-        for jornada, datos in all_rounds_scores.items():
-            # Ordenar por puntuación
-            datos_ordenados = sorted(datos, key=lambda x: x[1])
-            
-            # Agrupar usuarios por puntuación
-            grupos = {}
-            for usuario, puntos in datos_ordenados:
-                if puntos not in grupos:
-                    grupos[puntos] = []
-                grupos[puntos].append(usuario)
-            
-            # Tomar las tres primeras puntuaciones con usuarios
-            menores[jornada] = {}
-            for i, (puntos, usuarios) in enumerate(grupos.items()):
-                if i < 3:
-                    menores[jornada][puntos] = usuarios
-                else:
-                    break
+        # logging.info(f'Todas las puntuaciones: {all_rounds_scores}')
         
-        cur.execute("SELECT COUNT(*) FROM players")
-        player_num = cur.fetchone()[0]
-        
-        debts = {}
-        
+        deudas_acumuladas = {jugador: 0 for jugador in range(1, num_jugadores + 1)}
+
         sql_insert_debts_history = '''
-        INSERT INTO player_debts_history (player_id, round_id, amount)
-        VALUES (%s, %s, %s)
-        ON DUPLICATE KEY UPDATE amount = VALUES(amount);
+            INSERT INTO player_debts_history (player_id, round_id, amount)
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE amount = VALUES(amount);
         '''
-        
-        for id in range(1, player_num + 1):
-            debts[id] = 0
-            for jornum, jor in menores.items():
-                logging.info('PDH insert: ' + jornum)
-                for debs, users in jor.items():
-                    if [id] == users:
-                        debts[id] += 2
-                        cur.execute(sql_insert_debts_history, (id, jornum, 2))
-                    elif id in users and len(users) > 1:
-                        debts[id] += 1
-                        cur.execute(sql_insert_debts_history, (id, jornum, 1))
-                    else:
-                        debts[id] += 0
-        
+
         sql_insert_debts = '''
-        INSERT INTO player_debts (player_id, amount)
-        VALUES (%s, %s)
-        ON DUPLICATE KEY UPDATE amount = VALUES(amount);
+            INSERT INTO player_debts (player_id, amount)
+            VALUES (%s, %s)
+            ON DUPLICATE KEY UPDATE amount = amount + VALUES(amount);
         '''
-        for deb in debts:
-            cur.execute(sql_insert_debts, (deb, debts[deb]))
+
+        for jornada, puntuaciones_jornada in all_rounds_scores.items():
+            lista_puntuaciones = sorted(puntuaciones_jornada, key=lambda x: x[1])
+            
+            deudas_jornada = {jugador: 0 for jugador in range(1, num_jugadores + 1)}
+
+            tres_ultimos = lista_puntuaciones[:3]
+            ultimo, penultimo, tercer_peor = tres_ultimos
+
+            deudas_jornada[ultimo[0]] += 2
+            deudas_jornada[penultimo[0]] += 2
+
+            tercer_lugar_puntos = tercer_peor[1]
+            empate_tercero = [jugador for jugador, punt in lista_puntuaciones if punt == tercer_lugar_puntos]
+
+            if len(empate_tercero) == 1:
+                deudas_jornada[tercer_peor[0]] += 2
+            elif len(empate_tercero) > 1 and tercer_peor[0] not in [ultimo[0], penultimo[0]]:
+                for jugador in empate_tercero:
+                    deudas_jornada[jugador] += 1
+
+            for jugador in range(1, num_jugadores + 1):
+                suma = deudas_jornada[jugador]
+                deudas_acumuladas[jugador] += suma
+                
+                # logging.info(f'Jugador: {jugador}, Jornada: {jornada}, Deuda esta jornada: {suma}')
+                
+                cur.execute(sql_insert_debts_history, (jugador, jornada, suma))
+                
+                cur.execute(sql_insert_debts, (jugador, deudas_acumuladas[jugador]))
 
         db.connection.commit()
 
@@ -283,3 +266,4 @@ def calcular_y_actualizar_deudas(db):
 
     finally:
         cur.close()
+

@@ -2,7 +2,7 @@ from flask import Flask, request, redirect, url_for, render_template, jsonify
 from flask_mysqldb import MySQL
 from misterscrapper import get_player_list, get_all_jornada_points
 from dotenv import load_dotenv
-from db.mister.misterdb import upsert_points, upsert_player, get_jornada, get_rounds, get_debts
+from db.mister.misterdb import upsert_points, upsert_player, get_jornada, get_rounds, get_debts, calcular_y_actualizar_deudas
 import os
 import logging
 
@@ -110,6 +110,15 @@ def num_jornadas():
 def debts_list():
     try:
         return jsonify(get_debts(db)), 200
+    except Exception as e:
+        logging.error(f"Error retrieving rounds: {e}")
+        return {"message": "Error"}, 500
+
+@app.route('/api/calcdebts', methods=['GET'])
+def debts_calc():
+    try:
+        calcular_y_actualizar_deudas(db)
+        return {"message": "OK"}, 200
     except Exception as e:
         logging.error(f"Error retrieving rounds: {e}")
         return {"message": "Error"}, 500

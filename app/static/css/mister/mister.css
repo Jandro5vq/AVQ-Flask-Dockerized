@@ -99,6 +99,9 @@ h1{
     margin: 0 auto;
     overflow: auto;
 }
+#leaderboard-table{
+    width: 50%;
+}
 
 #leaderboard-table > div.tabulator-tableholder > div > div > div:nth-child(4){
     padding-left: 10px !important;
@@ -182,6 +185,6 @@ footer{
         font-size: small;
     }
     #leaderboard-table, #debts-table {
-        max-width: 100%;
+        width: 100%;
     }
 }
