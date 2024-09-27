@@ -101,6 +101,7 @@ h1{
     padding-right: 10px !important;
 }
 .tabulator {
+    background-color: transparent !important;
     border: none !important;
     border-radius: 8px;
 }
