@@ -117,6 +117,12 @@ def get_rounds(db):
         return None
 
 def get_debts(db):
+    """
+    Obtiene las deudas de los jugadores por jornada y la deuda total.
+
+    :param db: Objeto de conexión a la base de datos.
+    :return: Lista de tuplas con deudas por jornada y deuda total.
+    """
     try:
         cur = db.connection.cursor()
         point_db(db, cur)
@@ -127,7 +133,7 @@ def get_debts(db):
         
         # Construir la consulta SQL dinámicamente
         select_clause = ', '.join(
-            [f"COALESCE(SUM(CASE WHEN r.num = {jornada} THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada{jornada}" for jornada in jornadas]
+            [f"COALESCE(SUM(CASE WHEN r.num = %s THEN pdh.amount ELSE 0 END), 0) AS Deuda_Jornada{jornada}" for jornada in jornadas]
         )
         
         query = f'''
@@ -141,7 +147,10 @@ def get_debts(db):
         GROUP BY p.name
         ORDER BY Deuda_Total DESC;'''
 
-        cur.execute(query)
+        # Ejecutar la consulta con parámetros
+        params = jornadas  # Los parámetros se deben proporcionar en el mismo orden
+        cur.execute(query, params)
+        
         result = cur.fetchall()
         cur.close()
         
@@ -150,7 +159,10 @@ def get_debts(db):
             
     except Exception as e:
         print(f"Error: {e}")
+        if cur:
+            cur.close()  # Asegurarse de cerrar el cursor en caso de error
         return None
+
 
 
 def get_jornada(db, num):
@@ -192,7 +204,7 @@ def calcular_y_actualizar_deudas(db):
         rounds = cur.fetchall()
         rounds = [x[0] for x in rounds]
 
-        logging.info(rounds)
+        logging.info("Rounds: " + rounds)
         
         all_rounds_scores = {}
         
@@ -242,6 +254,7 @@ def calcular_y_actualizar_deudas(db):
         for id in range(1, player_num + 1):
             debts[id] = 0
             for jornum, jor in menores.items():
+                logging.info('PDH insert: ' + jornum)
                 for debs, users in jor.items():
                     if [id] == users:
                         debts[id] += 2
